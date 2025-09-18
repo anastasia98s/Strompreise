@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDX Calculated Members Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        button:hover {
+            tabular_transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .output-section {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        #output {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            min-height: 500px;
+            overflow-y: auto;
+            background: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            border: none;
+            color: #ecf0f1;
+            resize: vertical;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            padding: 8px 16px;
+            font-size: 12px;
+            width: auto;
+            margin: 0;
+        }
+        
+        .copy-btn:hover {
+            background: #c0392b;
+        }
+        
+        .component-row {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 2fr 3fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .component-row input {
+            margin-bottom: 0;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            width: auto;
+            margin: 0;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .add-component-btn {
+            background: #27ae60;
+            width: auto;
+            margin-bottom: 15px;
+            padding: 10px 20px;
+        }
+        
+        .add-component-btn:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 MDX Calculated Members Generator</h1>
+        
+        <div class="input-section">
+            <label for="baseMeasures">Base Measures (MDX):</label>
+            <textarea id="baseMeasures" rows="8" placeholder="Enter your base measures here, e.g.:
+CREATE MEMBER CURRENTCUBE.[Measures].[Mehrwertsteuer] AS
+  Ancestor([Geographie].[Standort].CurrentMember, [Geographie].[Standort].[Land]).Properties(&quot;Mehrwertsteuer&quot;),
+  VISIBLE = 1;
+
+CREATE MEMBER CURRENTCUBE.[Measures].[Eurokurs] AS
+  Ancestor([Geographie].[Standort].CurrentMember, [Geographie].[Standort].[Land]).Properties(&quot;Eurokurs&quot;),
+  VISIBLE = 1;">CREATE MEMBER CURRENTCUBE.[Measures].[Mehrwertsteuer] AS
+  Ancestor([Geographie].[Standort].CurrentMember, [Geographie].[Standort].[Land]).Properties("Mehrwertsteuer"),
+  FORMAT_STRING = "Percent",
+  VISIBLE = 1;
+
+CREATE MEMBER CURRENTCUBE.[Measures].[Eurokurs] AS
+  Ancestor([Geographie].[Standort].CurrentMember, [Geographie].[Standort].[Land]).Properties("Eurokurs"),
+  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",
+  VISIBLE = 1;
+
+CREATE MEMBER CURRENTCUBE.[Measures].[Average]
+  AS [Measures].[Summe]/[Measures].[Anzahl],
+  VISIBLE = 1;</textarea>
+        </div>
+
+        <div class="input-section">
+            <label for="aggregations">Select Aggregation Functions:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="maximum" value="Maximum" checked>
+                    <label for="maximum">Maximum</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="minimum" value="Minimum">
+                    <label for="minimum">Minimum</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="average" value="Average">
+                    <label for="average">Average</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="sum" value="Sum">
+                    <label for="sum">Sum</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <label>Components:</label>
+            <div id="components-container">
+                <div class="component-row">
+                    <input type="text" placeholder="Component Name (e.g., Zertifikat)" value="Zertifikat">
+                    <input type="text" placeholder="Component ID" value="e0d30cef5c6139275b58b525001b413c">
+                    <button type="button" class="remove-btn" onclick="removeComponent(this)">Remove</button>
+                </div>
+            </div>
+            <button type="button" class="add-component-btn" onclick="addComponent()">+ Add Component</button>
+        </div>
+
+        <button onclick="generateMDX()">Generate MDX Code</button>
+
+        <div class="output-section">
+            <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+            <textarea id="output" readonly placeholder="Generated MDX code will appear here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        function addComponent() {
+            const container = document.getElementById('components-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'component-row';
+            newRow.innerHTML = `
+                <input type="text" placeholder="Component Name">
+                <input type="text" placeholder="Component ID">
+                <button type="button" class="remove-btn" onclick="removeComponent(this)">Remove</button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeComponent(button) {
+            const container = document.getElementById('components-container');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('At least one component is required!');
+            }
+        }
+
+        function getSelectedAggregations() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function getComponents() {
+            const rows = document.querySelectorAll('.component-row');
+            return Array.from(rows).map(row => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                return {
+                    name: inputs[0].value.trim(),
+                    id: inputs[1].value.trim()
+                };
+            }).filter(comp => comp.name && comp.id);
+        }
+
+        function generateMDX() {
+            const aggregations = getSelectedAggregations();
+            const components = getComponents();
+            const baseMeasures = document.getElementById('baseMeasures').value.trim();
+            
+            if (aggregations.length === 0) {
+                alert('Please select at least one aggregation function!');
+                return;
+            }
+            
+            if (components.length === 0) {
+                alert('Please add at least one component!');
+                return;
+            }
+
+            let mdx = 'CALCULATE;\n\n';
+            
+            // Base measures (from textarea)
+            if (baseMeasures) {
+                mdx += '-- Base Measures\n';
+                mdx += baseMeasures + '\n\n';
+            }
+
+            // Generate for each component and aggregation
+            components.forEach(component => {
+                aggregations.forEach(aggregation => {
+                    mdx += `-- ${component.name} (${aggregation})\n`;
+                    mdx += '-- ' + '-'.repeat(50) + '\n';
+                    
+                    // Netto
+                    mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[${component.name} (Netto)(${aggregation})(Euro)] AS\n`;
+                    mdx += `  ([Preis].[Komponente].&[${component.id}], [Measures].[${aggregation}]) * [Measures].[Eurokurs],\n`;
+                    mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                    mdx += '  VISIBLE = 1;\n\n';
+                    
+                    // MwSt
+                    mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[${component.name} (MwSt)(${aggregation})(Euro)] AS\n`;
+                    mdx += `  [Measures].[${component.name} (Netto)(${aggregation})(Euro)] * [Measures].[Mehrwertsteuer],\n`;
+                    mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                    mdx += '  VISIBLE = 1;\n\n';
+                    
+                    // Brutto
+                    mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[${component.name} (Brutto)(${aggregation})(Euro)] AS\n`;
+                    mdx += `  [Measures].[${component.name} (Netto)(${aggregation})(Euro)] + [Measures].[${component.name} (MwSt)(${aggregation})(Euro)],\n`;
+                    mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                    mdx += '  VISIBLE = 1;\n\n';
+                });
+            });
+
+            // Generate totals for each aggregation
+            aggregations.forEach(aggregation => {
+                mdx += `-- Gesamtpreis (${aggregation})\n`;
+                mdx += '-- ' + '-'.repeat(50) + '\n';
+                
+                // Netto Total
+                const nettoSum = components.map(comp => `[Measures].[${comp.name} (Netto)(${aggregation})(Euro)]`).join(' + ');
+                mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[Gesamtpreis (Netto)(${aggregation})(Euro)] AS\n`;
+                mdx += `  ${nettoSum},\n`;
+                mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                mdx += '  VISIBLE = 1;\n\n';
+                
+                // Brutto Total
+                const bruttoSum = components.map(comp => `[Measures].[${comp.name} (Brutto)(${aggregation})(Euro)]`).join(' + ');
+                mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[Gesamtpreis (Brutto)(${aggregation})(Euro)] AS\n`;
+                mdx += `  ${bruttoSum},\n`;
+                mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                mdx += '  VISIBLE = 1;\n\n';
+
+                // Steuern und Abgaben
+                mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[Steuern und Abgaben (${aggregation})(Euro)] AS\n`;
+                mdx += `  [Measures].[Gesamtpreis (Brutto)(${aggregation})(Euro)]-[Measures].[Power (Netto)(${aggregation})(Euro)],\n`;
+                mdx += `  FORMAT_STRING = "#.##0,00 €;-#.##0,00 €",\n`
+                mdx += '  VISIBLE = 1;\n\n';
+
+                mdx += `CREATE MEMBER CURRENTCUBE.[Measures].[Steuern und Abgaben von Power (Prozent)(${aggregation})(Euro)] AS\n`;
+                mdx += `  IIF([Measures].[Power (Netto)(${aggregation})(Euro)] <> 0,\n`;
+                mdx += `    ([Measures].[Steuern und Abgaben (${aggregation})(Euro)] / [Measures].[Power (Netto)(${aggregation})(Euro)]),\n`;
+                mdx += `    NULL),\n`;
+                mdx += `  FORMAT_STRING = "Percent",\n`;
+                mdx += '  VISIBLE = 1;\n\n';
+            });
+
+            document.getElementById('output').value = mdx;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+            
+            const btn = document.querySelector('.copy-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.background = '#27ae60';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '#e74c3c';
+            }, 2000);
+        }
+
+        // Initialize with default components
+        window.onload = function() {
+            const defaultComponents = [
+                {name: 'Stromsteuer', id: 'a6eabd1446efd5e2e6ed8fb2e57d657d'},
+                {name: 'Grid', id: 'ff4a008470319a22d9cf3d14af485977'},
+                {name: 'Power', id: '62cd275989e78ee56a81f0265a87562e'}
+            ];
+            
+            defaultComponents.forEach(comp => {
+                addComponent();
+                const rows = document.querySelectorAll('.component-row');
+                const lastRow = rows[rows.length - 1];
+                const inputs = lastRow.querySelectorAll('input[type="text"]');
+                inputs[0].value = comp.name;
+                inputs[1].value = comp.id;
+            });
+        };
+    </script>
+</body>
+</html>

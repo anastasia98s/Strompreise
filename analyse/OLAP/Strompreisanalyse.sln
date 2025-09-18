@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.35130.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D2ABAB84-BF74-430A-B69E-9DC6D40DDA17}") = "Strompreisanalyse", "Strompreisanalyse\Strompreisanalyse.dwproj", "{646E9AE5-2411-426E-81C5-86C08E838253}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Development|Default = Development|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{646E9AE5-2411-426E-81C5-86C08E838253}.Development|Default.ActiveCfg = Development
+		{646E9AE5-2411-426E-81C5-86C08E838253}.Development|Default.Build.0 = Development
+		{646E9AE5-2411-426E-81C5-86C08E838253}.Development|Default.Deploy.0 = Development
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D87A4A1-7C7C-457C-BBDC-B424CB970A4A}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,65 @@
+services: 
+  # SQL Server Database 
+  mssql: 
+    image: mcr.microsoft.com/mssql/server:2019-latest 
+    container_name: strom_db_app 
+    user: "0:0" 
+    environment: 
+      - ACCEPT_EULA=Y 
+      - SA_PASSWORD=${DB_PASSWORD} 
+      - MSSQL_PID=Express 
+    ports: 
+      - "${DB_PORT}:1433" 
+    volumes: 
+      - mssql_data:/var/opt/mssql 
+    networks: 
+      - app_network 
+    healthcheck: 
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' -C || exit 1"] 
+      interval: 10s 
+      timeout: 5s 
+      retries: 10 
+      start_period: 30s 
+    restart: unless-stopped 
+ 
+  # Database Setup
+  setup-db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      - ACCEPT_EULA=Y
+    networks:
+      - app_network
+    command: >
+      /opt/mssql-tools18/bin/sqlcmd 
+      -S mssql 
+      -U sa 
+      -P ${DB_PASSWORD} 
+      -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'strom_db') CREATE DATABASE strom_db" 
+      -C
+    restart: "no"
+
+  # FastAPI Application 
+  fastapi: 
+    build:  
+      context: . 
+      dockerfile: Dockerfile 
+    container_name: strom_app 
+    ports: 
+      - "8000:9000" 
+    depends_on: 
+      - setup-db
+    volumes: 
+      - .:/app 
+    networks: 
+      - app_network 
+    restart: unless-stopped 
+ 
+volumes: 
+  mssql_data: 
+ 
+networks: 
+  app_network: 
+    driver: bridge

@@ -1,0 +1,55 @@
+{
+    "USE_PROXY": false,
+    "PROXIES": {
+        "http": "socks5h://127.0.1.0:9050",
+        "https": "socks5h://127.0.1.0:9050"
+    },
+    "IP_CHECK_URL": "http://httpbin.org/ip",
+    "PROXY_SETTING_IP": "127.0.1.0",
+    "PROXY_SETTING_PORT": 9051,
+    "FETCH_HEADER": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+    },
+    "FETCH_MIN_DELAY": 0,
+    "FETCH_MAX_DELAY": 0,
+    "JSON_LOG_DIR": "data/json_log",
+    "SCHEDULER_INTERVAL": 86400,
+    "COUNTRY_CONFIG": [
+        {
+            "name": "Deutschland",
+            "vat": 0.19,
+            "currency": 1,
+            "url": "https://tibber.com/de/api/lookup/price-overview?postalCode=",
+            "csv": "data/csv/deutschland.csv",
+            "sep": ";",
+            "province": "Bundesland",
+            "city": "Ort",
+            "additional": "Zusatz",
+            "postal": "Plz"
+        }
+    ],
+    "DATE_COMPONENTS_CONFIG": [
+        "yesterdayHours"
+    ],
+    "PRICE_COMPONENTS_CONFIG": [
+        {
+            "name": "energy taxes",
+            "alias": ["taxes", "energy tax"]
+        },
+        {
+            "name": "power",
+            "alias": ["power"]
+        },
+        {
+            "name": "grid",
+            "alias": ["grid"]
+
+        },
+        {
+            "name": "certificate",
+            "alias": ["energy certificate"]
+
+        }
+    ]
+}

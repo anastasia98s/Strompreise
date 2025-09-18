@@ -1,0 +1,80 @@
+.query-editor {
+    font-family: 'Courier New', monospace;
+}
+.schema-view {
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+}
+.result-table {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s;
+}
+.fade-enter, .fade-leave-to {
+    opacity: 0;
+}
+.slide-enter-active, .slide-leave-active {
+    transition: all 0.3s ease;
+}
+.slide-enter, .slide-leave-to {
+    tabular_transform: translateX(100%);
+    opacity: 0;
+}
+.schema-panel {
+    transition: all 0.3s ease;
+}
+.schema-panel.hidden {
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+.main-content {
+    transition: all 0.3s ease;
+}
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.content-area {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+}
+.cell-clickable {
+    cursor: pointer;
+}
+.cell-clickable:hover {
+    background-color: #eff6ff !important;
+}
+.json-key {
+    color: #d63384;
+    font-weight: bold;
+}
+.json-string {
+    color: #198754;
+}
+.json-number {
+    color: #0d6efd;
+}
+.json-boolean {
+    color: #fd7e14;
+}
+.json-null {
+    color: #6c757d;
+    font-style: italic;
+}
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+.modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+}
