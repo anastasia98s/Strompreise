@@ -17,7 +17,7 @@ class BotManager(TableManager, CSVManager, IBotManager):
         self.task_manager_list: List[TaskManager] = []
         self.worker_manager_list: List[WorkerManager] = []
         self.save_json_file: bool = True
-        self.save_json_db: bool = True
+        self.save_json_db: bool = False
         self.transform_to_tabular: bool = True
         self.fetch_min_delay: int = config.FETCH_MIN_DELAY
         self.fetch_max_delay: int = config.FETCH_MAX_DELAY

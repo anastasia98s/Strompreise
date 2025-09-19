@@ -44,17 +44,6 @@ FROM t_postal_area
 JOIN t_city ON t_city.ci_id = t_postal_area.ci_id 
 JOIN t_province ON t_province.p_id = t_city.p_id
 JOIN t_country ON t_country.c_id = t_province.c_id;` },
-    { label: 'Electricity data/hour', query: `SELECT TOP 100 
-    JSON_QUERY(pa_data, '$.energy.todayHours') AS "Electricity data/hour", 
-    pa_code AS "Zip Code", 
-    ci_name AS "City", 
-    c_name AS "Country"
-FROM t_postal_area 
-JOIN t_city ON t_city.ci_id = t_postal_area.ci_id 
-JOIN t_province ON t_province.p_id = t_city.p_id
-JOIN t_country ON t_country.c_id = t_province.c_id
-WHERE c_name = 'Deutschland' AND pa_data IS NOT NULL;
-` },
     { label: 'Total Electricity Data/Country', query: `SELECT c_name AS "Country", COUNT(*) AS "Total Data"
 FROM t_postal_area
 JOIN t_city ON t_city.ci_id = t_postal_area.ci_id 
@@ -63,84 +52,7 @@ JOIN t_country ON t_country.c_id = t_province.c_id
 WHERE pa_status_code = 200
 GROUP BY c_name;
 ` },
-    { label: 'Electricity Price Components in Hour (JSON)', query: `-- formula for germany region, for other regions there may be missing components!
-
-SELECT
-  hourly_data.value AS "Data",
-  JSON_VALUE(pa_data, '$.currency') AS "Currency",
-  JSON_VALUE(hourly_data.value, '$.date') AS "Date", 
-  JSON_VALUE(hourly_data.value, '$.hour') AS "Hour", 
-
-  -- Taxes
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceExcludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'taxes') AS "taxes_ex_vat",
-
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceIncludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'taxes') AS "taxes_in_vat",
-
-  -- Power
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceExcludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'power') AS "power_ex_vat",
-
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceIncludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'power') AS "power_in_vat",
-
-  -- Grid
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceExcludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'grid') AS "grid_ex_vat",
-
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceIncludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'grid') AS "grid_in_vat",
-
-  pa_code AS "Zip Code", 
-  ci_name AS "City", 
-  c_name AS "Country"
-
-FROM t_postal_area 
-JOIN t_city     ON t_city.ci_id = t_postal_area.ci_id 
-JOIN t_province ON t_province.p_id = t_city.p_id
-JOIN t_country  ON t_country.c_id = t_province.c_id
-CROSS APPLY OPENJSON(JSON_QUERY(pa_data, '$.energy.todayHours')) AS hourly_data
-
-WHERE pa_code = '01307';
-` },
-    { label: 'Electricity Price in Hour (JSON)', query: `-- formula for germany region, for other regions there may be missing components!
-
-SELECT
-  JSON_VALUE(hourly_data.value, '$.date') AS "Date", 
-  JSON_VALUE(hourly_data.value, '$.hour') AS "Hour", 
-  CAST(JSON_VALUE(hourly_data.value, '$.priceIncludingVat') AS DECIMAL(10,4)) AS "Gesamtpreis",
-
-  (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceExcludingVat') AS DECIMAL(10,4))
-   FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-   WHERE JSON_VALUE(pc.value, '$.type') = 'power') AS "Nettostrompreis",
-
-  (CAST(JSON_VALUE(hourly_data.value, '$.priceIncludingVat') AS DECIMAL(10,4)) - 
-   (SELECT TOP 1 CAST(JSON_VALUE(pc.value, '$.priceExcludingVat') AS DECIMAL(10,4))
-    FROM OPENJSON(JSON_QUERY(hourly_data.value, '$.priceComponents')) AS pc
-    WHERE JSON_VALUE(pc.value, '$.type') = 'power')) AS "Steuern_und_Abgaben",
-
-  pa_code AS "Zip Code", 
-  ci_name AS "City", 
-  c_name AS "Country",
-  JSON_VALUE(pa_data, '$.currency') AS "Currency",
-  hourly_data.value AS "Data"
-
-FROM t_postal_area 
-JOIN t_city     ON t_city.ci_id = t_postal_area.ci_id 
-JOIN t_province ON t_province.p_id = t_city.p_id
-JOIN t_country  ON t_country.c_id = t_province.c_id
-CROSS APPLY OPENJSON(JSON_QUERY(pa_data, '$.energy.todayHours')) AS hourly_data
-
-WHERE pa_code = '01307';
-` },
-    { label: 'Electricity Net Price per Hour (TABULAR)', query: `SELECT t_component.co_name, t_hour.h_hour, t_date.d_date, t_value.v_value, t_postal_area.pa_code, t_postal_area.pa_data
+    { label: 'Electricity Net Price per Hour (TABULAR)', query: `SELECT t_component.co_name, t_hour.h_hour, t_date.d_date, t_value.v_value, t_postal_area.pa_code
 FROM t_value
 JOIN t_hour ON t_hour.h_id = t_value.h_id
 JOIN t_date ON t_date.d_id = t_value.d_id
